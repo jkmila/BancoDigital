@@ -1,0 +1,493 @@
+swagger: '2.0'
+
+info:
+  version: 1.0.0
+  title: Banco Digital API
+  description: Abertura de conta-corrente, Consulta de saldo, Consulta de extrato, Cadastro de favorecidos, Edição de favorecidos, Remoção de favorecidos, Realizar transferência bancária, Consultar transferências bancárias
+  termsOfService: http://localhost:8085/bancodigital-api/v1/termo-uso
+  contact:
+    name: Suporte
+    url: http://localhost:8085/bancodigital-api/v1/suporte
+    email: suporte@bancodigitalapi.com.br
+
+schemes: 
+  - http
+  - https
+  
+host: bancodigital-api.com
+basePath: /v1
+
+securityDefinitions:
+  BasicAuth: 
+    type: basic
+    
+security: 
+  - BasicAuth: []
+
+consumes:
+  - aplication/json
+produces:
+  - aplication/json
+  
+tags:
+  - name: Cliente
+  - name: Conta
+  - name: Extrato
+  - name: Transacao
+  - name: Favorecido
+  - name: Transferencia
+
+paths:
+  '/cliente':
+    post:
+      tags:
+        - Cliente
+      summary: Cadastra Cliente
+      description: Cadastra um novo cliente
+      operationId: CadastraCliente
+      parameters:
+        - in: body
+          name: cliente
+          required: true
+          schema:
+            $ref: '#/definitions/Cliente'
+      responses:
+        201:
+          description: Cadastro efetuado com sucesso
+          schema:
+            $ref: '#/definitions/Cliente'
+        400:
+          description: Requisição inválida
+        500:
+          description: Erro interno no servidor
+          
+  '/favorecido':
+    post:
+      tags:
+        - Favorecido
+      summary: Cadastra Favorecido
+      description: Cadastra um novo favorecido
+      operationId: CadastraFavorecido
+      parameters:
+        - in: body
+          name: favorecido
+          required: true
+          schema:
+            $ref: '#/definitions/Favorecido'
+        - in: header
+          name: Authorization
+          type: string
+          required: true            
+      responses:
+        201:
+          description: Cadastro efetuado com sucesso
+          schema:
+            $ref: '#/definitions/Favorecido'
+        400:
+          description: Requisição inválida
+        500:
+          description: Erro interno no servidor
+  
+  '/favorecido/{codigo}':
+    put:
+      tags:
+        - Favorecido
+      summary: Altera um favorecido
+      description: Altera um favorecido
+      operationId: alteraFavorecido
+      security:
+        - BasicAuth: []
+      parameters:
+        - in: path
+          name: codigo
+          type: integer
+          format: int64
+          required: true
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+      responses:
+        204:
+          description: Alteração efetuada com sucesso
+          schema:
+            $ref: '#/definitions/Favorecido'
+        400:
+          description: Requisição inválida
+        401:
+          description: Requisição não autorizada
+        500:
+          description: Erro interno no servidor
+    
+    delete:
+      tags:
+        - Favorecido
+      summary: Exclui um favorecido
+      description: Exclui um favorecido
+      operationId: excluirFavorecido
+      security:
+        - BasicAuth: []
+      parameters:
+        - in: path
+          name: codigo
+          type: integer
+          format: int64
+          required: true
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+      responses:
+        204:
+          description: Exclusão efetuada com sucesso
+        400:
+          description: Requisição inválida
+        401:
+          description: Requisição não autorizada
+        500:
+          description: Erro interno no servidor
+          
+
+  '/conta/{agencia}/{conta}/{digito}/saldo':
+    get:
+      tags:
+        - Conta
+      summary: Consulta de Saldo
+      description: Consulta do Saldo da Conta do Cliente
+      operationId: consultaSaldo
+      security:
+        - BasicAuth: []
+      parameters:
+        - in: path
+          name: agencia
+          type: integer
+          format: int32
+          required: true
+        - in: path
+          name: conta
+          type: integer
+          format: int64
+          required: true 
+        - in: path
+          name: digito
+          type: integer
+          format: int32
+          required: true  
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+      responses:
+        200:
+          description: Consulta realizada com sucesso
+          schema:
+            type: number
+            format: double
+        400:
+          description: Requisição inválida
+        401:
+          description: Requisição não autorizada
+        500:
+          description: Erro interno no servidor
+
+  '/transacao':
+    post:
+      tags:
+        - Transacao
+      summary: Cadastra Transação na Conta
+      description: Cadastra uma transação
+      security:
+        - BasicAuth: []
+      operationId: cadastraTransacao
+      parameters:
+        - in: header
+          type: string
+          name: Autorization
+          required: true
+        - in: body
+          name: transacao
+          schema:
+            $ref: '#/definitions/Transacao'
+          required: true
+        - in: query
+          name: tipo
+          type: string
+          enum: 
+            - debitos
+            - depositos
+            - transferencias
+            - pagamentos
+          required: true
+      responses:
+        201:
+          description: Cadastro de transação efetuado com sucesso
+          schema:
+            $ref: '#/definitions/Transacao'
+        400:
+          description: Requisição inválida
+        401:
+          description: Requisição não autorizada
+        500:
+          description: Erro interno no servidor
+          
+
+  '/transferencia':
+    post:
+      tags:
+        - Transferencia
+      summary: Realiza Transferencia
+      description: Realiza Transferencia
+      security:
+        - BasicAuth: []
+      operationId: cadastraTransferencia
+      parameters:
+        - in: header
+          type: string
+          name: Autorization
+          required: true
+        - in: body
+          name: transferencia
+          schema:
+            $ref: '#/definitions/Transferencia'
+          required: true
+      responses:
+        201:
+          description: Transferencia realizada com sucesso
+          schema:
+            $ref: '#/definitions/Transferencia'
+        400:
+          description: Requisição inválida
+        401:
+          description: Requisição não autorizada
+        500:
+          description: Erro interno no servidor
+
+  '/transferencia/{agencia}/{conta}/{digito}':
+    get:
+      tags:
+        - Transferencia
+      summary: Consulta Transferencia
+      description: Consulta Transferencia
+      security:
+        - BasicAuth: []
+      operationId: consultaTransferencia
+      parameters:
+        - in: header
+          type: string
+          name: Autorization
+          required: true
+        - in: path
+          name: agencia
+          type: integer
+          format: int32
+          required: true
+        - in: path
+          name: conta
+          type: integer
+          format: int64
+          required: true 
+        - in: path
+          name: digito
+          type: integer
+          format: int32
+          required: true  
+      responses:
+        200:
+          description: Consulta realizada com sucesso
+          schema:
+            $ref: '#/definitions/Transferencia'
+        400:
+          description: Requisição inválida
+        401:
+          description: Requisição não autorizada
+        500:
+          description: Erro interno no servidor          
+          
+  '/extrato/{agencia}/{conta}/{digito}':
+    get:
+      tags:
+        - Extrato
+      summary: Consulta Extrato
+      description: Consulta o Extrato da Conta do Cliente
+      operationId: consultaExtrato
+      security:
+        - BasicAuth: []
+      parameters:
+        - in: path
+          name: agencia
+          type: integer
+          format: int32
+          required: true
+        - in: path
+          name: conta
+          type: integer
+          format: int64
+          required: true 
+        - in: path
+          name: digito
+          type: integer
+          format: int32
+          required: true  
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+      responses:
+        200:
+          description: Consulta realizada com sucesso
+          schema:
+            $ref: '#/definitions/Extrato'
+        400:
+          description: Requisição inválida
+        401:
+          description: Requisição não autorizada
+        500:
+          description: Erro interno no servidor
+  
+
+    
+definitions:
+  Cliente:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+        example: 001
+      titular: 
+        type: string
+        example: Nome do Cliente
+      cpf:
+        type: string
+        maxLength: 11
+        minLength: 11
+        example: 01234567899
+      senha:
+        type: string
+        format: password
+        example: senhaCliente
+      conta:
+        type: array
+        items:
+          $ref: '#/definitions/Conta'
+          
+  Favorecido:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+        example: 001
+      nome: 
+        type: string
+        example: Nome do Favorecido
+      cpf:
+        type: string
+        maxLength: 11
+        minLength: 11
+        example: 01234567899
+      agencia:
+        type: integer
+        format: int32
+        example: 999
+      conta:
+        type: integer
+        format: int64
+        example: 123456
+      digito:
+        type: integer
+        format: int32
+        example: 1
+      ativo:
+        type: string
+        enum:
+          - Ativo
+          - Inativo
+      cliente:
+        type: array
+        items:
+          $ref: '#/definitions/Cliente'
+          
+  Conta:
+    type: object
+    properties:
+      agencia:
+        type: integer
+        format: int32
+        example: 999
+      conta:
+        type: integer
+        format: int64
+        example: 123456
+      digito:
+        type: integer
+        format: int32
+        example: 1
+      saldo:
+        type: number
+        format: double
+        example: 50.50
+      cliente:
+        $ref: '#/definitions/Cliente'
+
+  Transacao:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      tipo:
+        type: string
+        enum: 
+          - debitos
+          - depositos
+          - transferencias
+          - pagamentos
+      valor:
+        type: number
+        format: double
+      data:
+        type: string
+        format: date-time
+      conta:
+        $ref: '#/definitions/Conta'
+        
+  Transferencia:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      cliente:
+        $ref: '#/definitions/Cliente'
+      favorecido:
+        $ref: '#/definitions/Favorecido'
+      valor:
+        type: number
+        format: double
+      data:
+        type: string
+        format: date-time
+      conta:
+        $ref: '#/definitions/Conta'
+        
+  Extrato:
+    type: object
+    properties:
+      transacoes: 
+        type: array
+        items:
+          $ref: '#/definitions/Transacao'
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+
+
+
