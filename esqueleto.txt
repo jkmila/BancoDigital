@@ -1,0 +1,23 @@
+Abertura de conta-corrente
+Consulta de saldo
+Consulta de extrato
+Cadastro de favorecidos
+Edição de favorecidos
+Remoção de favorecidos
+Realizar transferência bancária
+Consultar transferências bancárias
+
+#meta dados em heather
+#delete logico, o campo ganha uma flag 
+boleana de inativo
+
+post em /contas
+get in /contas/{agencia}/{conta}
+get in /contas/{agencia}/{conta}
+post em /contas/{agencia}/{conta}/favorecidos
+Put em /contas/{agencia}/{conta}/favorecidos/{id}
+Delete em /contas/{agencia}/{conta}/favorecidos/{id}
+Post em /contas/{agencia}/{conta}/transferências
+Get em /contas/{agencia}/{conta}/transferências
+outro exemplo
+Get em /contas/{agencia}/{conta}transferências?data ini data fim
